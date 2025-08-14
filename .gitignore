@@ -1,0 +1,4 @@
+config/*
+config/config.json
+config/credentials.json
+
