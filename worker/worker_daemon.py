@@ -1,61 +1,55 @@
 import socket
-import subprocess
-import socket
+import torch
+
 from model_loader import ModelLoader
 from tensor_parallel_runner import TensorParallelRunner
 from comms import send_result, receive_task
 
 def run_worker_daemon(port=5050):
     """
-    Simple worker node daemon that listens for incoming 'ping' commands
-    from the manager and responds with 'pong'.
+    Worker daemon: listens for incoming tensor chunks, processes them,
+    and sends results back to manager.
     """
-
+    # Load model (PoC: pseudo model)
     model_loader = ModelLoader()
-    model = model_loader.load_model("pseudo_model")
+    model = model_loader.load_model("pseudo_model")  # replace with real model later
     runner = TensorParallelRunner(model)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # allow quick restart
     s.bind(("0.0.0.0", port))
     s.listen(5)
     print(f"[WORKER] Listening on port {port}...")
 
-    while True:
-        conn, addr = s.accept()
-        print(f"[WORKER] Connection from {addr}")
-        data = conn.recv(1024).decode()
-        print(f"[WORKER] Received command: {data}")
+    try:
+        while True:
+            conn, addr = s.accept()
+            print(f"[WORKER] Connection from {addr}")
 
+            try:
+                # Receive tensor chunk
+                task = receive_task(conn)
+                tensor_chunk = torch.tensor(task['tensor']).to("cuda:0")
+                print(f"[WORKER] Received tensor chunk of shape {tensor_chunk.shape}")
+                print(f"[WORKER] Tensor chunk: {tensor_chunk}")
 
+                # Process tensor (PoC: multiply by 2)
+                result_tensor = runner.run(tensor_chunk)
 
-        # Receive a pseudo task
-        task = receive_task(conn)
-        chunk = task.get('chunk', None)
-        print(f"[WORKER] Received task chunk: {chunk}")
+                # Send result back
+                send_result(conn, result_tensor.cpu().numpy())
+                print(f"[WORKER] Sent result back to manager")
 
-        # Run tensor operation
-        result = runner.run(chunk)
+            except Exception as e:
+                print(f"[WORKER] Error during processing: {e}")
+            finally:
+                conn.close()
 
-        # Send result back
-        send_result(conn, result)
+    except KeyboardInterrupt:
+        print("[WORKER] Shutting down daemon")
+    finally:
+        s.close()
 
-
-
-        if data.strip() == "shutdown":
-            conn.sendall(b"shutting down\n")
-            conn.close()
-            break
-
-        if data.strip() == "ping":
-            conn.sendall(b"pong\n")
-        elif data.strip() == "run date":
-            # Example: run local shell command
-            output = subprocess.check_output("date", shell=True)
-            conn.sendall(output)
-        else:
-            conn.sendall(b"unknown command\n")
-
-        conn.close()
 
 if __name__ == "__main__":
     run_worker_daemon()
