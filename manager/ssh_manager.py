@@ -1,7 +1,5 @@
 import paramiko
 
-import paramiko
-
 class SSHManager:
     def __init__(self, hostname, username, key_path):
         self.hostname = hostname
