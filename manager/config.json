@@ -1,0 +1,6 @@
+{
+  "workers": [
+    { "name": "", "ip": "", "port": , "status": "ready" },
+    { "name": "", "ip": "", "port": , "status": "ready" }
+  ]
+}
