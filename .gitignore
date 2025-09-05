@@ -2,3 +2,9 @@ config/*
 config/config.json
 config/credentials.json
 
+manager/config.json
+manager/credentials.json
+
+models/*
+models/sam2/*
+
