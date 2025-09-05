@@ -1,0 +1,6 @@
+{
+  "workers": [
+    { "name": "localhost", "ip": "10.10.10.115", "port": 5050, "status": "ready" },
+    { "name": "csrobot", "ip": "10.10.10.201", "port": 5050, "status": "ready" }
+  ]
+}

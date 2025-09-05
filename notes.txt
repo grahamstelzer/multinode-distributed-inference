@@ -1,0 +1,13 @@
+connect with tcp to 5050 (daemon already started so no need for ssh):
+- start daemon on worker
+- nc 10.10.10.201 5050
+- commands can be ping/data/shutdown note: you have to press enter twice?
+
+
+
+
+Kill existing process
+
+On Linux/macOS:
+lsof -i :5050
+kill -9 <PID> (windows)
