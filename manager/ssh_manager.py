@@ -1,3 +1,10 @@
+"""
+NOT implemented yet
+
+though as of now, this is not quite needed 
+using socket to send bytes via TCP(TODO: double check its TCP)
+"""
+
 import paramiko
 
 class SSHManager:

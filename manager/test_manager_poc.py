@@ -2,6 +2,7 @@
 manager to workers proof of concept test
 
 just makes a small tensor, splits it, sends to workers, collects results
+NOTE: all functionality for the test except for Monitor class is in this file
 
 manager methodology:
 - monitor.py: find ready workers
@@ -18,8 +19,6 @@ worker:
 
 
 
-
-
 import torch
 import socket
 import pickle
@@ -29,6 +28,7 @@ from monitor import Monitor
 def send_tensor_chunk(worker_ip, worker_port, tensor_chunk):
     """
     Connect to worker, send tensor, and receive result robustly
+    TODO: double check the concepts in here, right now this is a black box
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((worker_ip, worker_port))
@@ -58,7 +58,7 @@ def send_tensor_chunk(worker_ip, worker_port, tensor_chunk):
 
 def main():
     # get ready workers
-    monitor = Monitor(config_path="config.json")
+    monitor = Monitor(config_path="config.json") # from Monitor.py
     ready_workers = monitor.get_ready_workers()
     print("[POC] Ready workers (IP, port):", ready_workers)
 

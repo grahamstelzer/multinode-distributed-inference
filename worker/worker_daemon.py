@@ -47,6 +47,7 @@ def run_worker_daemon(port=5050):
 
     except KeyboardInterrupt:
         print("[WORKER] Shutting down daemon")
+        # TODO: the keyboard interrupt doesnt register on windows pc for some reason?
     finally:
         s.close()
 
