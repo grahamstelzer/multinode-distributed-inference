@@ -78,8 +78,13 @@ from sam2.modeling.sam2_base import SAM2Base
 model = SAM2Base(...)
 
 
+
+
 for name, module in model.named_modules():
     print(name, type(module))
+
+
+
 
 from my_distributed.attn import DistributedAttention
 

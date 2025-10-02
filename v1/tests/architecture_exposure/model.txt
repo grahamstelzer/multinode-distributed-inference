@@ -1,0 +1,296 @@
+Sam2VideoModel(
+  (shared_image_embedding): Sam2VideoPositionalEmbedding()
+  (vision_encoder): Sam2VisionModel(
+    (backbone): Sam2HieraDetModel(
+      (patch_embed): Sam2PatchEmbeddings(
+        (projection): Conv2d(3, 144, kernel_size=(7, 7), stride=(4, 4), padding=(3, 3))
+      )
+      (blocks): ModuleList(
+        (0-1): 2 x Sam2MultiScaleBlock(
+          (layer_norm1): LayerNorm((144,), eps=1e-06, elementwise_affine=True)
+          (attn): Sam2MultiScaleAttention(
+            (qkv): Linear(in_features=144, out_features=432, bias=True)
+            (proj): Linear(in_features=144, out_features=144, bias=True)
+          )
+          (layer_norm2): LayerNorm((144,), eps=1e-06, elementwise_affine=True)
+          (mlp): Sam2FeedForward(
+            (activation): GELUActivation()
+            (proj_in): Linear(in_features=144, out_features=576, bias=True)
+            (proj_out): Linear(in_features=576, out_features=144, bias=True)
+            (layers): ModuleList()
+          )
+        )
+        (2): Sam2MultiScaleBlock(
+          (layer_norm1): LayerNorm((144,), eps=1e-06, elementwise_affine=True)
+          (attn): Sam2MultiScaleAttention(
+            (qkv): Linear(in_features=144, out_features=864, bias=True)
+            (proj): Linear(in_features=288, out_features=288, bias=True)
+          )
+          (layer_norm2): LayerNorm((288,), eps=1e-06, elementwise_affine=True)
+          (mlp): Sam2FeedForward(
+            (activation): GELUActivation()
+            (proj_in): Linear(in_features=288, out_features=1152, bias=True)
+            (proj_out): Linear(in_features=1152, out_features=288, bias=True)
+            (layers): ModuleList()
+          )
+          (proj): Linear(in_features=144, out_features=288, bias=True)
+        )
+        (3-7): 5 x Sam2MultiScaleBlock(
+          (layer_norm1): LayerNorm((288,), eps=1e-06, elementwise_affine=True)
+          (attn): Sam2MultiScaleAttention(
+            (qkv): Linear(in_features=288, out_features=864, bias=True)
+            (proj): Linear(in_features=288, out_features=288, bias=True)
+          )
+          (layer_norm2): LayerNorm((288,), eps=1e-06, elementwise_affine=True)
+          (mlp): Sam2FeedForward(
+            (activation): GELUActivation()
+            (proj_in): Linear(in_features=288, out_features=1152, bias=True)
+            (proj_out): Linear(in_features=1152, out_features=288, bias=True)
+            (layers): ModuleList()
+          )
+        )
+        (8): Sam2MultiScaleBlock(
+          (layer_norm1): LayerNorm((288,), eps=1e-06, elementwise_affine=True)
+          (attn): Sam2MultiScaleAttention(
+            (qkv): Linear(in_features=288, out_features=1728, bias=True)
+            (proj): Linear(in_features=576, out_features=576, bias=True)
+          )
+          (layer_norm2): LayerNorm((576,), eps=1e-06, elementwise_affine=True)
+          (mlp): Sam2FeedForward(
+            (activation): GELUActivation()
+            (proj_in): Linear(in_features=576, out_features=2304, bias=True)
+            (proj_out): Linear(in_features=2304, out_features=576, bias=True)
+            (layers): ModuleList()
+          )
+          (proj): Linear(in_features=288, out_features=576, bias=True)
+        )
+        (9-43): 35 x Sam2MultiScaleBlock(
+          (layer_norm1): LayerNorm((576,), eps=1e-06, elementwise_affine=True)
+          (attn): Sam2MultiScaleAttention(
+            (qkv): Linear(in_features=576, out_features=1728, bias=True)
+            (proj): Linear(in_features=576, out_features=576, bias=True)
+          )
+          (layer_norm2): LayerNorm((576,), eps=1e-06, elementwise_affine=True)
+          (mlp): Sam2FeedForward(
+            (activation): GELUActivation()
+            (proj_in): Linear(in_features=576, out_features=2304, bias=True)
+            (proj_out): Linear(in_features=2304, out_features=576, bias=True)
+            (layers): ModuleList()
+          )
+        )
+        (44): Sam2MultiScaleBlock(
+          (layer_norm1): LayerNorm((576,), eps=1e-06, elementwise_affine=True)
+          (attn): Sam2MultiScaleAttention(
+            (qkv): Linear(in_features=576, out_features=3456, bias=True)
+            (proj): Linear(in_features=1152, out_features=1152, bias=True)
+          )
+          (layer_norm2): LayerNorm((1152,), eps=1e-06, elementwise_affine=True)
+          (mlp): Sam2FeedForward(
+            (activation): GELUActivation()
+            (proj_in): Linear(in_features=1152, out_features=4608, bias=True)
+            (proj_out): Linear(in_features=4608, out_features=1152, bias=True)
+            (layers): ModuleList()
+          )
+          (proj): Linear(in_features=576, out_features=1152, bias=True)
+        )
+        (45-47): 3 x Sam2MultiScaleBlock(
+          (layer_norm1): LayerNorm((1152,), eps=1e-06, elementwise_affine=True)
+          (attn): Sam2MultiScaleAttention(
+            (qkv): Linear(in_features=1152, out_features=3456, bias=True)
+            (proj): Linear(in_features=1152, out_features=1152, bias=True)
+          )
+          (layer_norm2): LayerNorm((1152,), eps=1e-06, elementwise_affine=True)
+          (mlp): Sam2FeedForward(
+            (activation): GELUActivation()
+            (proj_in): Linear(in_features=1152, out_features=4608, bias=True)
+            (proj_out): Linear(in_features=4608, out_features=1152, bias=True)
+            (layers): ModuleList()
+          )
+        )
+      )
+    )
+    (neck): Sam2VisionNeck(
+      (position_encoding): Sam2SinePositionEmbedding()
+      (convs): ModuleList(
+        (0): Conv2d(1152, 256, kernel_size=(1, 1), stride=(1, 1))
+        (1): Conv2d(576, 256, kernel_size=(1, 1), stride=(1, 1))
+        (2): Conv2d(288, 256, kernel_size=(1, 1), stride=(1, 1))
+        (3): Conv2d(144, 256, kernel_size=(1, 1), stride=(1, 1))
+      )
+    )
+  )
+  (prompt_encoder): Sam2VideoPromptEncoder(
+    (shared_embedding): Sam2VideoPositionalEmbedding()
+    (mask_embed): Sam2VideoMaskEmbedding(
+      (activation): GELUActivation()
+      (conv1): Conv2d(1, 4, kernel_size=(2, 2), stride=(2, 2))
+      (conv2): Conv2d(4, 16, kernel_size=(2, 2), stride=(2, 2))
+      (conv3): Conv2d(16, 256, kernel_size=(1, 1), stride=(1, 1))
+      (layer_norm1): Sam2VideoLayerNorm((4,), eps=1e-06, elementwise_affine=True)
+      (layer_norm2): Sam2VideoLayerNorm((16,), eps=1e-06, elementwise_affine=True)
+    )
+    (no_mask_embed): Embedding(1, 256)
+    (point_embed): Embedding(4, 256)
+    (not_a_point_embed): Embedding(1, 256)
+  )
+  (mask_decoder): Sam2VideoMaskDecoder(
+    (iou_token): Embedding(1, 256)
+    (mask_tokens): Embedding(4, 256)
+    (transformer): Sam2VideoTwoWayTransformer(
+      (layers): ModuleList(
+        (0-1): 2 x Sam2VideoTwoWayAttentionBlock(
+          (self_attn): Sam2VideoAttention(
+            (q_proj): Linear(in_features=256, out_features=256, bias=True)
+            (k_proj): Linear(in_features=256, out_features=256, bias=True)
+            (v_proj): Linear(in_features=256, out_features=256, bias=True)
+            (o_proj): Linear(in_features=256, out_features=256, bias=True)
+          )
+          (layer_norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (cross_attn_token_to_image): Sam2VideoAttention(
+            (q_proj): Linear(in_features=256, out_features=128, bias=True)
+            (k_proj): Linear(in_features=256, out_features=128, bias=True)
+            (v_proj): Linear(in_features=256, out_features=128, bias=True)
+            (o_proj): Linear(in_features=128, out_features=256, bias=True)
+          )
+          (layer_norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (mlp): Sam2VideoFeedForward(
+            (activation): ReLU()
+            (proj_in): Linear(in_features=256, out_features=2048, bias=True)
+            (proj_out): Linear(in_features=2048, out_features=256, bias=True)
+            (layers): ModuleList()
+          )
+          (layer_norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (layer_norm4): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+          (cross_attn_image_to_token): Sam2VideoAttention(
+            (q_proj): Linear(in_features=256, out_features=128, bias=True)
+            (k_proj): Linear(in_features=256, out_features=128, bias=True)
+            (v_proj): Linear(in_features=256, out_features=128, bias=True)
+            (o_proj): Linear(in_features=128, out_features=256, bias=True)
+          )
+        )
+      )
+      (final_attn_token_to_image): Sam2VideoAttention(
+        (q_proj): Linear(in_features=256, out_features=128, bias=True)
+        (k_proj): Linear(in_features=256, out_features=128, bias=True)
+        (v_proj): Linear(in_features=256, out_features=128, bias=True)
+        (o_proj): Linear(in_features=128, out_features=256, bias=True)
+      )
+      (layer_norm_final_attn): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+    )
+    (upscale_conv1): ConvTranspose2d(256, 64, kernel_size=(2, 2), stride=(2, 2))
+    (upscale_conv2): ConvTranspose2d(64, 32, kernel_size=(2, 2), stride=(2, 2))
+    (upscale_layer_norm): Sam2VideoLayerNorm((64,), eps=1e-06, elementwise_affine=True)
+    (activation): GELU(approximate='none')
+    (output_hypernetworks_mlps): ModuleList(
+      (0-3): 4 x Sam2VideoFeedForward(
+        (activation): ReLU()
+        (proj_in): Linear(in_features=256, out_features=256, bias=True)
+        (proj_out): Linear(in_features=256, out_features=32, bias=True)
+        (layers): ModuleList(
+          (0): Linear(in_features=256, out_features=256, bias=True)
+        )
+      )
+    )
+    (iou_prediction_head): Sam2VideoFeedForward(
+      (activation): ReLU()
+      (proj_in): Linear(in_features=256, out_features=256, bias=True)
+      (proj_out): Linear(in_features=256, out_features=4, bias=True)
+      (layers): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=True)
+      )
+    )
+    (conv_s0): Conv2d(256, 32, kernel_size=(1, 1), stride=(1, 1))
+    (conv_s1): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1))
+    (obj_score_token): Embedding(1, 256)
+    (pred_obj_score_head): Sam2VideoFeedForward(
+      (activation): ReLU()
+      (proj_in): Linear(in_features=256, out_features=256, bias=True)
+      (proj_out): Linear(in_features=256, out_features=1, bias=True)
+      (layers): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=True)
+      )
+    )
+  )
+  (memory_attention): Sam2VideoMemoryAttention(
+    (layers): ModuleList(
+      (0-3): 4 x Sam2VideoMemoryAttentionLayer(
+        (self_attn): Sam2VideoRoPEAttention(
+          (q_proj): Linear(in_features=256, out_features=256, bias=True)
+          (k_proj): Linear(in_features=256, out_features=256, bias=True)
+          (v_proj): Linear(in_features=256, out_features=256, bias=True)
+          (o_proj): Linear(in_features=256, out_features=256, bias=True)
+        )
+        (cross_attn_image): Sam2VideoRoPEAttention(
+          (q_proj): Linear(in_features=256, out_features=256, bias=True)
+          (k_proj): Linear(in_features=64, out_features=256, bias=True)
+          (v_proj): Linear(in_features=64, out_features=256, bias=True)
+          (o_proj): Linear(in_features=256, out_features=256, bias=True)
+        )
+        (linear1): Linear(in_features=256, out_features=2048, bias=True)
+        (dropout): Dropout(p=0.1, inplace=False)
+        (linear2): Linear(in_features=2048, out_features=256, bias=True)
+        (layer_norm1): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+        (layer_norm2): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+        (layer_norm3): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+        (dropout1): Dropout(p=0.1, inplace=False)
+        (dropout2): Dropout(p=0.1, inplace=False)
+        (dropout3): Dropout(p=0.1, inplace=False)
+        (activation): ReLU()
+      )
+    )
+    (layer_norm): LayerNorm((256,), eps=1e-05, elementwise_affine=True)
+    (rotary_emb): Sam2VideoVisionRotaryEmbedding()
+  )
+  (memory_encoder): Sam2VideoMemoryEncoder(
+    (mask_downsampler): Sam2VideoMaskDownSampler(
+      (layers): ModuleList(
+        (0): Sam2VideoMaskDownSamplerLayer(
+          (conv): Conv2d(1, 4, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+          (layer_norm): Sam2VideoLayerNorm((4,), eps=1e-06, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (1): Sam2VideoMaskDownSamplerLayer(
+          (conv): Conv2d(4, 16, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+          (layer_norm): Sam2VideoLayerNorm((16,), eps=1e-06, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (2): Sam2VideoMaskDownSamplerLayer(
+          (conv): Conv2d(16, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+          (layer_norm): Sam2VideoLayerNorm((64,), eps=1e-06, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+        (3): Sam2VideoMaskDownSamplerLayer(
+          (conv): Conv2d(64, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+          (layer_norm): Sam2VideoLayerNorm((256,), eps=1e-06, elementwise_affine=True)
+          (activation): GELUActivation()
+        )
+      )
+      (activation): GELUActivation()
+      (final_conv): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1))
+    )
+    (feature_projection): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1))
+    (memory_fuser): Sam2VideoMemoryFuser(
+      (layers): ModuleList(
+        (0-1): 2 x Sam2VideoMemoryFuserCXBlock(
+          (depthwise_conv): Conv2d(256, 256, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3), groups=256)
+          (layer_norm): Sam2VideoLayerNorm((256,), eps=1e-06, elementwise_affine=True)
+          (activation): GELUActivation()
+          (pointwise_conv1): Linear(in_features=256, out_features=1024, bias=True)
+          (pointwise_conv2): Linear(in_features=1024, out_features=256, bias=True)
+        )
+      )
+    )
+    (position_encoding): Sam2VideoPositionEmbeddingSine()
+    (projection): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1))
+  )
+  (mask_downsample): Conv2d(1, 1, kernel_size=(4, 4), stride=(4, 4))
+  (object_pointer_proj): Sam2VideoFeedForward(
+    (activation): ReLU()
+    (proj_in): Linear(in_features=256, out_features=256, bias=True)
+    (proj_out): Linear(in_features=256, out_features=256, bias=True)
+    (layers): ModuleList(
+      (0): Linear(in_features=256, out_features=256, bias=True)
+    )
+  )
+  (temporal_positional_encoding_projection_layer): Identity()
+)
