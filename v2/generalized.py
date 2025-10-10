@@ -91,7 +91,7 @@ def show_masks(image, masks, scores, point_coords=None, box_coords=None, input_l
 
 
 # example image
-image = Image.open('images/truck.jpg')
+image = Image.open('./truck.jpg')
 image = np.array(image.convert("RGB"))
 
 plt.figure(figsize=(10, 10))
@@ -105,21 +105,27 @@ plt.show()
 
 
 
-# model loading starts here
+from pathlib import Path
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
-sam2_checkpoint = "..sam2.1_hiera_large.pt"
-model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+device = "cuda"
+repo_root = Path(__file__).resolve().parent
 
-sam2_model = build_sam2(model_cfg, sam2_checkpoint, device=device)
+sam2_checkpoint = repo_root / "sam2.1_hiera_large.pt"
+model_cfg = repo_root / "sam2.1_hiera_l.yaml"
 
+assert sam2_checkpoint.exists(), f"Checkpoint missing: {sam2_checkpoint}"
+assert model_cfg.exists(), f"Config missing: {model_cfg}"
+
+sam2_model = build_sam2(str(model_cfg), str(sam2_checkpoint), device=device)
 predictor = SAM2ImagePredictor(sam2_model)
 
 predictor.set_image(image)
 
 input_point = np.array([[500, 375]])
 input_label = np.array([1])
+
 
 # plt.figure(figsize=(10, 10))
 # plt.imshow(image)
