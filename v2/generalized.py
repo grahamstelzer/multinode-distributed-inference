@@ -9,8 +9,6 @@ from PIL import Image
 
 
 
-
-
 # select the device for computation
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -22,7 +20,7 @@ print(f"using device: {device}")
 
 if device.type == "cuda":
     # use bfloat16 for the entire notebook
-    torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
+    torch.autocast("cuda", dtype=torch.float16).__enter__() # notebook uses bfloat16
     # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
     if torch.cuda.get_device_properties(0).major >= 8:
         torch.backends.cuda.matmul.allow_tf32 = True
@@ -52,22 +50,22 @@ def show_mask(mask, ax, random_color=False, borders = True):
     mask_image =  mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
     if borders:
         import cv2
-        contours, _ = cv2.findContours(mask,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) 
+        contours, _ = cv2.findContours(mask,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         # Try to smooth contours
         contours = [cv2.approxPolyDP(contour, epsilon=0.01, closed=True) for contour in contours]
-        mask_image = cv2.drawContours(mask_image, contours, -1, (1, 1, 1, 0.5), thickness=2) 
+        mask_image = cv2.drawContours(mask_image, contours, -1, (1, 1, 1, 0.5), thickness=2)
     ax.imshow(mask_image)
 
 def show_points(coords, labels, ax, marker_size=375):
     pos_points = coords[labels==1]
     neg_points = coords[labels==0]
     ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
-    ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)   
+    ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
 
 def show_box(box, ax):
     x0, y0 = box[0], box[1]
     w, h = box[2] - box[0], box[3] - box[1]
-    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0, 0, 0, 0), lw=2))    
+    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0, 0, 0, 0), lw=2))
 
 def show_masks(image, masks, scores, point_coords=None, box_coords=None, input_labels=None, borders=True):
     for i, (mask, score) in enumerate(zip(masks, scores)):
@@ -86,19 +84,14 @@ def show_masks(image, masks, scores, point_coords=None, box_coords=None, input_l
         plt.show()
 
 
-
-
-
-
 # example image
 image = Image.open('./truck.jpg')
 image = np.array(image.convert("RGB"))
 
-plt.figure(figsize=(10, 10))
-plt.imshow(image)
-plt.axis('on')
-plt.show()
-
+# plt.figure(figsize=(10, 10))
+# plt.imshow(image)
+# plt.axis('on')
+# plt.show()
 
 
 
@@ -108,12 +101,35 @@ plt.show()
 from pathlib import Path
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
+import yaml
+from pathlib import Path
 
+# device
 device = "cuda"
-repo_root = Path(__file__).resolve().parent
 
-sam2_checkpoint = repo_root / "sam2.1_hiera_large.pt"
-model_cfg = repo_root / "sam2.1_hiera_l.yaml"
+# weights
+sam2_checkpoint = "sam2.1_hiera_large.pt"
+
+# config
+LOCAL_CONFIG = True
+
+if LOCAL_CONFIG:
+
+    file_path = Path(__file__).parent / "sam2.1_hiera_l.yaml"
+
+    with open(file_path, "r") as f:
+        data = yaml.safe_load(f)
+
+    print(data)
+
+    # TODO: this is where we setup custom config class
+
+    model_cfg = file_path
+
+else:
+    # load from url or module tree?
+    pass
+
 
 assert sam2_checkpoint.exists(), f"Checkpoint missing: {sam2_checkpoint}"
 assert model_cfg.exists(), f"Config missing: {model_cfg}"
@@ -131,12 +147,12 @@ input_label = np.array([1])
 # plt.imshow(image)
 # show_points(input_point, input_label, plt.gca())
 # plt.axis('on')
-# plt.show() 
+# plt.show()
 
 masks, scores, logits = predictor.predict(
     point_coords=input_point,
     point_labels=input_label,
-    multimask_output=True,
+    multimask_output=True,v1
 )
 sorted_ind = np.argsort(scores)[::-1]
 masks = masks[sorted_ind]
