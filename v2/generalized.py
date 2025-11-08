@@ -7,38 +7,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
-
-
-
-
-# select the device for computation
-if torch.cuda.is_available():
-    device = torch.device("cuda")
-elif torch.backends.mps.is_available():
-    device = torch.device("mps")
-else:
-    device = torch.device("cpu")
-print(f"using device: {device}")
-
-if device.type == "cuda":
-    # use bfloat16 for the entire notebook
-    torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
-    # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
-    if torch.cuda.get_device_properties(0).major >= 8:
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
-elif device.type == "mps":
-    print(
-        "\nSupport for MPS devices is preliminary. SAM 2 is trained with CUDA and might "
-        "give numerically different outputs and sometimes degraded performance on MPS. "
-        "See e.g. https://github.com/pytorch/pytorch/issues/84936 for a discussion."
-    )
-
-
-
-
-
-
 # setup visualization functions
 np.random.seed(3)
 
@@ -87,60 +55,127 @@ def show_masks(image, masks, scores, point_coords=None, box_coords=None, input_l
 
 
 
+# # select the device for computation
+# if torch.cuda.is_available():
+#     device = torch.device("cuda")
+# elif torch.backends.mps.is_available():
+#     device = torch.device("mps")
+# else:
+#     device = torch.device("cpu")
+# print(f"using device: {device}")
+
+# if device.type == "cuda":
+#     # use bfloat16 for the entire notebook
+#     torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
+#     # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
+#     if torch.cuda.get_device_properties(0).major >= 8:
+#         torch.backends.cuda.matmul.allow_tf32 = True
+#         torch.backends.cudnn.allow_tf32 = True
+# elif device.type == "mps":
+#     print(
+#         "\nSupport for MPS devices is preliminary. SAM 2 is trained with CUDA and might "
+#         "give numerically different outputs and sometimes degraded performance on MPS. "
+#         "See e.g. https://github.com/pytorch/pytorch/issues/84936 for a discussion."
+#     )
 
 
 
-# example image
-image = Image.open('./truck.jpg')
-image = np.array(image.convert("RGB"))
-
-plt.figure(figsize=(10, 10))
-plt.imshow(image)
-plt.axis('on')
-plt.show()
 
 
-
-
-
-
-
+import yaml, json
 from pathlib import Path
-from sam2.build_sam import build_sam2
+
+cfg_path = Path(__file__).resolve().parent / "sam2.1_hiera_l.yaml"
+json_path = cfg_path.with_suffix(".json")
+
+with open(cfg_path) as f:
+    cfg_yaml = yaml.safe_load(f)
+
+with open(json_path, "w") as f:
+    json.dump(cfg_yaml, f, indent=2)
+
+print(f"Config converted → {json_path}")
+
+import torch
+import json
+import numpy as np
+from PIL import Image
+from pathlib import Path
+
+from sam2.modeling.sam2_base import SAM2Base
+from sam2.modeling.sam.mask_decoder import MaskDecoder
+from sam2.modeling.sam.prompt_encoder import PromptEncoder
+from sam2.modeling.sam2_utils import MLP, LayerNorm2d
+from sam2.modeling.position_encoding import PositionEmbeddingRandom
+from sam2.utils.transforms import SAM2Transforms
+
+# image setup
+image = Image.open('./truck.jpg').convert("RGB")
+image = np.array(image)
+
+# weight/config path setup
+repo_root = Path(__file__).resolve().parent
+sam2_checkpoint= repo_root / "sam2.1_hiera_large.pt"
+cfg_path = repo_root / "sam2.1_hiera_l.json"
+
+# check
+assert sam2_checkpoint.exists(), "Checkpoint missing!"
+assert cfg_path.exists(), "Config missing!"
+
+with open(cfg_path) as f:
+    cfg = json.load(f) # NOTE: cfg is nested python dict
+
+print(cfg)
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# load checkpoint weights, dependant on existence of 'model_state_dict' key:
+checkpoint = torch.load(sam2_checkpoint, map_location=device)
+weights = checkpoint.get("model_state_dict", checkpoint)
+
+
+
+
+backbone = build_backbone(cfg['model']['backbone'])
+prompt_encoder = PromptEncoder(**cfg['model']['prompt_encoder'])
+mask_decoder = MaskDecoder(**cfg['model']['mask_decoder'])
+
+sam2_model = SAM2Base(
+    backbone=backbone,
+    prompt_encoder=prompt_encoder,
+    mask_decoder=mask_decoder,
+    pixel_mean=cfg['model']['pixel_mean'],
+    pixel_std=cfg['model']['pixel_std'],
+)
+
+sam2_model.load_state_dict(weights, strict=False)
+sam2_model.to(device)
+
+
+
+
+
+
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
-device = "cuda"
-repo_root = Path(__file__).resolve().parent
-
-sam2_checkpoint = repo_root / "sam2.1_hiera_large.pt"
-model_cfg = repo_root / "sam2.1_hiera_l.yaml"
-
-assert sam2_checkpoint.exists(), f"Checkpoint missing: {sam2_checkpoint}"
-assert model_cfg.exists(), f"Config missing: {model_cfg}"
-
-sam2_model = build_sam2(str(model_cfg), str(sam2_checkpoint), device=device)
 predictor = SAM2ImagePredictor(sam2_model)
-
 predictor.set_image(image)
 
 input_point = np.array([[500, 375]])
 input_label = np.array([1])
-
-
-# plt.figure(figsize=(10, 10))
-# plt.imshow(image)
-# show_points(input_point, input_label, plt.gca())
-# plt.axis('on')
-# plt.show() 
 
 masks, scores, logits = predictor.predict(
     point_coords=input_point,
     point_labels=input_label,
     multimask_output=True,
 )
-sorted_ind = np.argsort(scores)[::-1]
-masks = masks[sorted_ind]
-scores = scores[sorted_ind]
-logits = logits[sorted_ind]
 
-show_masks(image, masks, scores, point_coords=input_point, input_labels=input_label, borders=True)
+print("Masks:", masks.shape)
+print("Scores:", scores)
+
+
+# for name, module in sam2_model.named_modules():
+#     print(name, type(module))
+
+# if isinstance(module, nn.MultiheadAttention):
+#     setattr(parent, name, DistributedAttention(...))

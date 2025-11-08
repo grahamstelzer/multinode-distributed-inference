@@ -1,0 +1,30 @@
+User prompt
+   │
+   ▼
+Tokenizer → token_ids
+   │
+   ▼
+LLM.generate()
+   │
+   ▼
+Engine (LLMEngine)
+   │
+   ├── Scheduler decides which sequence to run
+   ├── BlockManager stores/retrieves KV cache
+   ▼
+ModelRunner.forward()
+   │
+   ├── Embedding → Attention → MLP → Norm (layers/)
+   └── Uses rotary embeddings + KV cache
+   ▼
+Logits
+   │
+   ▼
+Sampler (with sampling_params)
+   │
+   ▼
+Next token
+   │
+   └── Loop until max tokens or EOS
+   ▼
+Final output sequence

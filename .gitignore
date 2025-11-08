@@ -8,3 +8,5 @@ manager/credentials.json
 models/*
 models/sam2/*
 
+v2/sam2.1_hiera_large.pt
+*.pt
