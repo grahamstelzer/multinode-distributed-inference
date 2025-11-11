@@ -146,5 +146,29 @@ class TPAttention(nn.Module):
         # each gpu computes a slice
         # custom all gather collects allk slices so each gpu has final result
         gathered = comm.all_gather_tensor_on_gpu(out) # NOTE: concat on last dim (heads)
+        
+        # (out_proj) second linear layer
+        # full should be (batch, seq, d_model)
         full = self.out_proj(gathered)
         return full
+
+# Minimal condensed SAM2-like block using TPAttention
+class MinimalBlock(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        self.attn = TPAttention(cfg.d_model, cfg.n_heads).to(Cfg.device).to(Cfg.dtype)
+        # small MLP (kept non-sharded for simplicity)
+        self.mlp_fc1 = nn.Linear(cfg.d_model, cfg.d_model * 4).to(Cfg.device).to(Cfg.dtype)
+        self.mlp_fc2 = nn.Linear(cfg.d_model * 4, cfg.d_model).to(Cfg.device).to(Cfg.dtype)
+        self.ln1 = nn.LayerNorm(cfg.d_model).to(Cfg.device).to(torch.float32)  # layernorm in fp32
+        self.ln2 = nn.LayerNorm(cfg.d_model).to(Cfg.device).to(torch.float32)
+
+    def forward(self, x, mask=None):
+        # keep layernorm in fp32 for stability
+        x_fp32 = x.to(torch.float32)
+        attn_out = self.attn(self.ln1(x_fp32).to(Cfg.dtype), mask)
+        x = x + attn_out
+        x_fp32 = x.to(torch.float32)
+        mlp_out = self.mlp_fc2(F.gelu(self.mlp_fc1(self.ln2(x_fp32).to(Cfg.dtype))))
+        x = x + mlp_out
+        return x
