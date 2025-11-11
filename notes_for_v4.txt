@@ -1,0 +1,4 @@
+for test:
+
+Input → LayerNorm → Multi-Head Self-Attention → Residual Add
+      → LayerNorm → MLP (Linear-GELU-Linear) → Residual Add → Output head

@@ -1,0 +1,61 @@
+backend="nccl"
+
+typing documentation:
+    Optional
+
+dist documentation:
+    rank
+        "unique integer id of the current process ... each GPU process has one rank"
+    world size
+        total number of ranks (GPUs)
+    barrier
+    destroy_process_group
+    get_world_size
+    all_gather
+    broadcast_object_list
+
+torch documentation:
+    empty_like
+    torch.cat
+    nn.module template documentation
+        search for custom nn.module setup
+    nn.Parameter
+    tensor creation documentation (torch.empty, torch.zeros, etc.)
+    torch.einsum with "("bsi, oi->bso", x, self.weight)"
+        https://docs.pytorch.org/docs/stable/generated/torch.einsum.html:
+            Sums the product of the elements of the input operands along dimensions 
+            specified using a notation based on the Einstein summation convention.
+        order of ops are:
+            x: (batch, seq, in_features)
+            weight: (out_features_local, in_features)
+            result: (batch, seq, out_features_local)
+        equivalent to "x @ weight.T"
+    <tensor>.view() function
+        reshapes the tensor WITHOUT copying data
+            how
+    torch.bmm
+
+torchrun --nproc_per_node=2 main.py
+
+MASTER_ADDR, MASTER_PORT, RANK, WORLD_SIZE
+
+python fundamentals i never learned:
+    __init__()
+    assert
+    with
+    //
+
+parallelism concepts review:
+    shardedlinear
+        "split linear layer's output dimension evenly across ranks ... each proces stores/computers only 
+        its slice of the output columns of the full weight matrix"
+    note to self: "sharding" is not a term only used for input shards
+    https://huggingface.co/transformers/v4.10.1/parallelism.html
+
+nn concepts review:
+    forward
+    rank
+    attention heads
+    all gather
+    RESHAPING ... find a reshaping course or something
+        must be able to answer "how can i reshape this data to fit into model"
