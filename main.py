@@ -24,6 +24,12 @@ class Cfg:
     device = "cuda"
     dtype = torch.float16
     
+
+"""
+shardedlinear:
+    implement y = xWᵀ + b, but shard W along its out_features dimension so each rank holds:
+
+"""
 class ShardedLinear(nn.Module):
     def __init__(self, in_features, out_features, bias=True):
         
@@ -57,11 +63,12 @@ class ShardedLinear(nn.Module):
         if self.bias is not None:
             out = out + self.bias.view(1, 1, -1)
         return out
-    
+
+
 class TPAttention(nn.Module):
     """
-    tensor parallel attention, split heads across ranks
-    (each rank computers its head outputs and they are all_gathered)
+    tensor parallel attention, split heads across ranks (gpus)
+    (each rank (gpu) computes its head outputs and they are all_gathered)
 
     - NOTE: assumes number of heads can be split evenly on gpus (world_size)
     """
@@ -80,7 +87,13 @@ class TPAttention(nn.Module):
         self.head_dim = d_model // n_heads
 
 
-        self.qkv = ShardedLinear(d_model, 3 * d_model, bias=True)
+
+        # commented out shardedlinear to isolate attn head splitting
+        # self.qkv = ShardedLinear(d_model, 3 * d_model, bias=True)
+        self.qkv = nn.Linear(d_model, d_model * 3, bias=True)
+
+
+
 
         if comm.world_size() == 1:
             self.out_proj = nn.Linear(d_model, d_model).to(Cfg.device).to(Cfg.dtype)
@@ -101,7 +114,6 @@ class TPAttention(nn.Module):
         qkv_local = self.qkv(x)
         
         # reshape local_out into (batch, seq, 3, local_heads, head_dim)
-        # NOTE: 3 hardcoded here for q,k,v
         local_out = qkv_local.view(batch, seq, 3, self.local_heads, self.head_dim)
         
         # get everything on dimension but select q k v respectively for local tensors
@@ -151,6 +163,8 @@ class TPAttention(nn.Module):
         # full should be (batch, seq, d_model)
         full = self.out_proj(gathered)
         return full
+
+
 
 # Minimal condensed SAM2-like block using TPAttention
 class MinimalBlock(nn.Module):
